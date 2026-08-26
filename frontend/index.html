@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>ProfAssistenc IA — Assistente de Planejamento Docente</title>
+
+    <link rel="icon" href="../assets/favicon.png" />
+    <link rel="stylesheet" href="./css/style.css" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+              },
+              glow: {
+                purple: "#a855f7",
+                pink: "#ec4899",
+              },
+            },
+
+            boxShadow: {
+              glow: "0 0 30px rgba(99,102,241,.18)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+
+  <body class="min-h-screen overflow-x-hidden">
+    <!-- BACKGROUND -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+      <div
+        class="absolute -top-48 -left-40 w-[520px] h-[520px] rounded-full bg-indigo-600/15 blur-[150px]"
+      ></div>
+
+      <div
+        class="absolute -bottom-56 -right-40 w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[170px]"
+      ></div>
+
+      <div class="absolute inset-0 dot-grid opacity-40"></div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="relative z-50 sm:px-1 py-1 bg-[#080c14]/45 backdrop-blur-sm">
+      <div
+        class="max-w-[1500px] mx-auto glass-card rounded-2xl sm:px-5 py-2.5 m-1 flex items-center justify-between shadow-2xl"
+      >
+        <!-- LOGO -->
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-glow"
+          >
+            <div
+              class="w-full h-full rounded-[11px] bg-[#080c14] flex items-center justify-center"
+            >
+              <i
+                data-lucide="brain-circuit"
+                class="w-5 h-5 text-indigo-300"
+              ></i>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="font-black tracking-tight text-lg">ProfAssistenc</h1>
+
+              <span
+                class="font-black text-lg bg-gradient-to-r from-pink-400 via-purple-400 to-amber-300 bg-clip-text text-transparent"
+              >
+                IA
+              </span>
+            </div>
+
+            <p
+              class="text-[9px] sm:text-[10px] uppercase tracking-[.16em] text-slate-500 font-semibold"
+            >
+              Assistente de Planejamento Docente
+            </p>
+          </div>
+        </div>
+
+        <!-- STATUS -->
+        <div class="flex items-center gap-2">
+          <div
+            class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/70 border border-emerald-500/20 text-[10px] text-emerald-300"
+          >
+            <span
+              class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"
+            ></span>
+
+            Ambiente de Teste Local
+          </div>
+
+          <button
+            id="btn-history-mobile"
+            type="button"
+            class="lg:hidden h-9 w-9 rounded-xl bg-slate-900/70 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition"
+            aria-label="Abrir histórico"
+          >
+            <i data-lucide="history" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main
+      class="relative z-10 max-w-[1500px] mx-auto w-full h-[calc(100vh-86px)] min-h-0"
+    >
+      <div
+        class="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4 h-full min-h-0"
+      >
+        <!-- HISTORY -->
+        <aside
+          id="history-panel"
+          class="fixed lg:static z-[70] lg:z-auto inset-y-0 left-0 w-[290px] lg:w-auto bg-[#080c14] lg:bg-transparent p-3 lg:p-0 transform -translate-x-full lg:transform-none transition-transform duration-200"
+        >
+          <div
+            class="glass-card rounded-2xl h-full flex flex-col overflow-hidden"
+          >
+            <!-- HISTORY HEADER -->
+            <div
+              class="p-4 border-b border-slate-800/80 flex items-center justify-between"
+            >
+              <div>
+                <p
+                  class="text-xs font-bold text-slate-200 flex items-center gap-2"
+                >
+                  <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
+
+                  Histórico
+                </p>
+
+                <p class="text-[10px] text-slate-500 mt-1">
+                  Suas conversas salvas
+                </p>
+              </div>
+
+              <button
+                id="btn-close-history"
+                type="button"
+                class="lg:hidden w-8 h-8 rounded-lg hover:bg-slate-800 text-slate-400"
+                aria-label="Fechar histórico"
+              >
+                <i data-lucide="x" class="w-4 h-4 mx-auto"></i>
+              </button>
+            </div>
+
+            <!-- NEW CONVERSATION -->
+            <div class="p-3">
+              <button
+                id="btn-sidebar-new"
+                type="button"
+                class="w-full h-9 rounded-xl border border-dashed border-indigo-400/25 bg-indigo-500/5 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/10 transition flex items-center justify-center gap-2"
+              >
+                <i data-lucide="message-square-plus" class="w-4 h-4"></i>
+
+                Nova conversa
+              </button>
+            </div>
+
+            <!-- HISTORY LIST -->
+            <div
+              id="history-list"
+              class="px-2 pb-3 flex-1 overflow-y-auto space-y-1"
+            >
+              <div class="empty-history rounded-xl p-4 text-center mt-1">
+                <i
+                  data-lucide="messages-square"
+                  class="w-6 h-6 text-slate-600 mx-auto mb-2"
+                ></i>
+
+                <p class="text-[11px] text-slate-500">
+                  Nenhuma conversa ainda.
+                </p>
+
+                <p class="text-[10px] text-slate-600 mt-1">
+                  A primeira aparecerá aqui.
+                </p>
+              </div>
+            </div>
+
+            <!-- HISTORY INFO -->
+            <div class="p-3 border-t border-slate-800/80">
+              <div
+                class="rounded-xl bg-slate-900/60 border border-slate-800 p-3"
+              >
+                <div class="flex gap-2">
+                  <i
+                    data-lucide="cloud"
+                    class="w-4 h-4 text-indigo-400 shrink-0 mt-0.5"
+                  ></i>
+
+                  <div>
+                    <p class="text-[10px] font-semibold text-slate-300">
+                      Histórico sincronizado
+                    </p>
+
+                    <p class="text-[9px] text-slate-500 mt-1 leading-relaxed">
+                      As conversas poderão ser restauradas quando o computador
+                      estiver conectado à internet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- CHAT -->
+        <section
+          class="glass-card rounded-2xl min-h-0 overflow-hidden flex flex-col"
+        >
+          <!-- CHAT HEADER -->
+          <div
+            class="px-4 sm:px-5 py-3 border-b border-slate-800/80 flex items-center justify-between gap-3"
+          >
+            <div class="min-w-0">
+              <p
+                class="text-[9px] uppercase tracking-[.16em] text-indigo-400 font-bold"
+              >
+                Planejamento docente
+              </p>
+
+              <h2
+                id="conversation-title"
+                class="text-sm sm:text-base font-bold text-slate-100 truncate"
+              >
+                Nova conversa
+              </h2>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span
+                id="save-status"
+                class="hidden sm:inline text-[10px] text-slate-600"
+              >
+                Pronto
+              </span>
+
+              <button
+                id="btn-copy"
+                type="button"
+                class="h-8 px-2.5 rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-600 transition text-[10px] flex items-center gap-1.5"
+              >
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+
+                Copiar
+              </button>
+            </div>
+          </div>
+
+          <!-- CHAT AREA -->
+          <div
+            id="chat-area"
+            class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-[380px]"
+          >
+            <!-- WELCOME -->
+            <div
+              id="welcome-state"
+              class="min-h-full flex items-center justify-center py-10"
+            >
+              <div class="max-w-2xl text-center">
+                <div
+                  class="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-400/15 flex items-center justify-center mb-5 shadow-glow"
+                >
+                  <i data-lucide="sparkles" class="w-7 h-7 text-indigo-300"></i>
+                </div>
+
+                <p
+                  class="text-[10px] uppercase tracking-[.2em] font-bold text-indigo-400 mb-2"
+                >
+                  Seu assistente pedagógico
+                </p>
+
+                <h3
+                  class="text-2xl sm:text-3xl font-black tracking-tight text-white"
+                >
+                  O que você quer planejar hoje?
+                </h3>
+
+                <p
+                  class="text-xs sm:text-sm text-slate-500 mt-3 max-w-lg mx-auto leading-relaxed"
+                >
+                  Peça um plano de aula, uma atividade, uma sequência didática
+                  ou adapte uma ideia que você já tenha.
+                </p>
+
+                <!-- SUGGESTIONS -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-7">
+                  <button
+                    class="suggestion rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-left hover:border-indigo-400/30 hover:bg-indigo-500/5 transition"
+                    data-suggestion="Me gere um plano de aula de Matemática sobre equações do 2º grau para o 1º ano do Ensino Médio."
+                  >
+                    <i
+                      data-lucide="calculator"
+                      class="w-4 h-4 text-indigo-400 mb-2"
+                    ></i>
+
+                    <p class="text-[11px] font-semibold text-slate-300">
+                      Plano de aula
+                    </p>
+
+                    <p class="text-[9px] text-slate-600 mt-1">
+                      Estrutura completa
+                    </p>
+                  </button>
+
+                  <button
+                    class="suggestion rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-left hover:border-indigo-400/30 hover:bg-indigo-500/5 transition"
+                    data-suggestion="Crie uma atividade prática de Ciências sobre fotossíntese para uma turma do Ensino Fundamental II."
+                  >
+                    <i
+                      data-lucide="flask-conical"
+                      class="w-4 h-4 text-indigo-400 mb-2"
+                    ></i>
+
+                    <p class="text-[11px] font-semibold text-slate-300">
+                      Atividade
+                    </p>
+
+                    <p class="text-[9px] text-slate-600 mt-1">
+                      Prática e dinâmica
+                    </p>
+                  </button>
+
+                  <button
+                    class="suggestion rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-left hover:border-indigo-400/30 hover:bg-indigo-500/5 transition"
+                    data-suggestion="Monte uma sequência didática de História sobre a Revolução Industrial para três aulas de 50 minutos."
+                  >
+                    <i
+                      data-lucide="landmark"
+                      class="w-4 h-4 text-indigo-400 mb-2"
+                    ></i>
+
+                    <p class="text-[11px] font-semibold text-slate-300">
+                      Sequência didática
+                    </p>
+
+                    <p class="text-[9px] text-slate-600 mt-1">Várias aulas</p>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- INPUT -->
+          <div class="border-t border-slate-800/80 p-3 sm:p-4 bg-[#080c14]/45">
+            <div class="flex items-end gap-2">
+              <div class="flex-1 relative">
+                <textarea
+                  id="message-input"
+                  rows="3"
+                  maxlength="2000"
+                  placeholder="Ex.: Me gere um plano de aula sobre fotossíntese para o 7º ano..."
+                  class="glass-input rounded-2xl px-4 py-3 pr-12 text-xs sm:text-sm leading-relaxed placeholder:text-slate-600"
+                ></textarea>
+
+                <div
+                  class="absolute bottom-2.5 right-3 text-[9px] text-slate-600"
+                >
+                  <span id="char-count">0</span>/2000
+                </div>
+              </div>
+
+              <button
+                id="btn-send"
+                type="button"
+                disabled
+                class="btn-neon shrink-0 h-[52px] w-[52px] rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Enviar mensagem"
+              >
+                <i data-lucide="send" class="w-5 h-5"></i>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between mt-2 px-1">
+              <p class="text-[9px] text-slate-600 flex items-center gap-1.5">
+                <i data-lucide="info" class="w-3 h-3"></i>
+
+                O planejamento é gerado a partir do contexto informado na
+                conversa.
+              </p>
+
+              <p class="text-[9px] text-slate-600 hidden sm:block">
+                Enter envia • Shift + Enter quebra linha
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- RENAME MODAL -->
+    <div id="rename-modal" class="rename-modal hidden">
+      <div class="rename-card">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p
+              class="text-[9px] uppercase tracking-[.18em] text-indigo-400 font-bold"
+            >
+              Conversa
+            </p>
+
+            <h3 class="text-base font-bold text-white mt-1">
+              Renomear conversa
+            </h3>
+          </div>
+
+          <button
+            id="rename-close"
+            type="button"
+            class="w-8 h-8 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition flex items-center justify-center"
+            aria-label="Fechar"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <input
+          id="rename-input"
+          type="text"
+          maxlength="80"
+          placeholder="Nome da conversa"
+          class="glass-input rounded-xl px-3 py-3 text-xs mt-5"
+        />
+
+        <div class="flex justify-end gap-2 mt-4">
+          <button
+            id="rename-cancel"
+            type="button"
+            class="px-3 py-2 rounded-lg border border-slate-700 text-[10px] text-slate-400 hover:text-white transition"
+          >
+            Cancelar
+          </button>
+
+          <button
+            id="rename-confirm"
+            type="button"
+            class="px-3 py-2 rounded-lg bg-indigo-500 text-[10px] font-semibold text-white hover:bg-indigo-400 transition"
+          >
+            Salvar nome
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- APP JS -->
+    <script src="./js/app.js"></script>
+  </body>
+</html>
