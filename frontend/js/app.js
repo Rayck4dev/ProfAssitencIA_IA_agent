@@ -7,7 +7,7 @@
    CONFIG
    ========================================================= */
 
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://localhost:7142";
 
 /* =========================================================
    DOM
@@ -181,7 +181,7 @@ function addMessage(role, content, temporary = false) {
       <div
         class="text-xs sm:text-sm text-slate-300 leading-relaxed message-content"
       >
-        ${escapeHtml(content)}
+         ${isUser ? escapeHtml(content) : renderMarkdown(content)}
       </div>
 
     </div>
@@ -416,6 +416,56 @@ function getWelcomeHTML() {
   `;
 }
 
+// FUNCTION FORMAT CHARACTERS
+
+function renderMarkdown(content) {
+  if (!content) {
+    return "";
+  }
+
+  // Remove escapes desnecessários do Markdown
+  const normalized = content
+    .replace(/\\([*_#>\-])/g, "$1")
+    .replace(/\\\[/g, "[")
+    .replace(/\\\]/g, "]");
+
+  // Converte Markdown para HTML
+  const html = marked.parse(normalized);
+
+  // Cria um container temporário
+  const container = document.createElement("div");
+  container.innerHTML = DOMPurify.sanitize(html);
+
+  // Renderiza fórmulas matemáticas com KaTeX
+  renderMathInElement(container, {
+    delimiters: [
+      {
+        left: "$$",
+        right: "$$",
+        display: true,
+      },
+      {
+        left: "\\(",
+        right: "\\)",
+        display: false,
+      },
+      {
+        left: "\\[",
+        right: "\\]",
+        display: true,
+      },
+      {
+        left: "$",
+        right: "$",
+        display: false,
+      },
+    ],
+    throwOnError: false,
+  });
+
+  return container.innerHTML;
+}
+
 /* =========================================================
    RESET CHAT
    ========================================================= */
@@ -533,7 +583,8 @@ async function sendMessage() {
   const loading = addLoading();
 
   try {
-    const response = await fetch(`${API_BASE}/api/lesson-plan`, {
+    console.log("Conversation ID enviado:", currentConversationId);
+    const response = await fetch(`${API_BASE}/api/LessonPlan`, {
       method: "POST",
 
       headers: {
@@ -556,11 +607,10 @@ async function sendMessage() {
     }
 
     const data = await response.json();
-
+    console.log("Resposta da API:", data);
+    console.log("Conversation ID recebido:", data.conversationId);
     loading.remove();
-
-    const result =
-      data.result || data.message || "Não foi possível gerar uma resposta.";
+    const result = data.response || "Não foi possível gerar uma resposta.";;
 
     /* AI MESSAGE */
 
@@ -571,8 +621,8 @@ async function sendMessage() {
       content: result,
     });
 
-    if (data.conversation_id) {
-      currentConversationId = data.conversation_id;
+    if (data.conversationId) {
+    currentConversationId = data.conversationId;
     }
 
     setStatus("Salvo");
@@ -863,7 +913,7 @@ async function loadConversation(id) {
 
     const data = await response.json();
 
-    currentConversationId = data.conversation_id || id;
+    currentConversationId = data.conversationId || id;
 
     messages = data.messages || [];
 
