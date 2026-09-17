@@ -7,42 +7,35 @@
    CONFIG
    ========================================================= */
 
-const API_BASE = "https://localhost:7142";
+const API_BASE = window.PROFASSISTENC_API_URL || "http://localhost:5096";
 
 /* =========================================================
    DOM
    ========================================================= */
 
 const chatArea = document.getElementById("chat-area");
-
 const input = document.getElementById("message-input");
-
 const sendButton = document.getElementById("btn-send");
-
 const charCount = document.getElementById("char-count");
-
 const historyList = document.getElementById("history-list");
-
 const conversationTitle = document.getElementById("conversation-title");
-
 const saveStatus = document.getElementById("save-status");
-
 const historyPanel = document.getElementById("history-panel");
-
 const renameModal = document.getElementById("rename-modal");
-
 const renameInput = document.getElementById("rename-input");
+const backendStatus = document.getElementById("backend-status");
+const backendStatusDot = document.getElementById("backend-status-dot");
+const backendStatusLabel = document.getElementById("backend-status-label");
+
+const initialChatHTML = chatArea ? chatArea.innerHTML : "";
 
 /* =========================================================
    STATE
    ========================================================= */
 
 let currentConversationId = null;
-
 let messages = [];
-
 let isGenerating = false;
-
 let renameConversationId = null;
 
 /* =========================================================
@@ -75,21 +68,50 @@ const installationId = getInstallationId();
 
 function escapeHtml(value) {
   const div = document.createElement("div");
-
   div.textContent = value ?? "";
-
   return div.innerHTML;
 }
 
 function setStatus(text, visible = true) {
-  saveStatus.textContent = text;
+  if (!saveStatus) return;
 
+  saveStatus.textContent = text;
   saveStatus.classList.toggle("hidden", !visible);
+}
+
+function setBackendStatus(connected) {
+  if (!backendStatus || !backendStatusDot || !backendStatusLabel) {
+    return;
+  }
+
+  backendStatus.classList.toggle("border-emerald-500/20", connected);
+
+  backendStatus.classList.toggle("text-emerald-300", connected);
+
+  backendStatus.classList.toggle("border-rose-500/20", !connected);
+
+  backendStatus.classList.toggle("text-rose-300", !connected);
+
+  backendStatus.style.borderColor = connected
+    ? "rgba(16, 185, 129, 0.2)"
+    : "rgba(244, 63, 94, 0.2)";
+
+  backendStatus.style.color = connected ? "#6ee7b7" : "#fda4af";
+
+  backendStatusDot.style.backgroundColor = connected ? "#34d399" : "#fb7185";
+
+  backendStatusDot.style.boxShadow = connected
+    ? "0 0 8px #34d399"
+    : "0 0 8px #fb7185";
+
+  backendStatusLabel.textContent = connected ? "API conectada" : "API offline";
 }
 
 function scrollChat() {
   requestAnimationFrame(() => {
-    chatArea.scrollTop = chatArea.scrollHeight;
+    if (chatArea) {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
   });
 }
 
@@ -125,10 +147,9 @@ function addMessage(role, content, temporary = false) {
 
   const wrapper = document.createElement("div");
 
-  wrapper.className =
-    role === "user" ? "flex justify-end" : "flex justify-start";
-
   const isUser = role === "user";
+
+  wrapper.className = isUser ? "flex justify-end" : "flex justify-start";
 
   wrapper.innerHTML = `
     <div
@@ -154,14 +175,11 @@ function addMessage(role, content, temporary = false) {
             justify-center
           "
         >
-
           <i
             data-lucide="${isUser ? "user-round" : "sparkles"}"
             class="w-3.5 h-3.5"
           ></i>
-
         </div>
-
 
         <span
           class="
@@ -172,16 +190,21 @@ function addMessage(role, content, temporary = false) {
             ${isUser ? "text-indigo-300" : "text-purple-300"}
           "
         >
-          ${isUser ? "Você" : "ProfAssistenc IA"}
+          ${isUser ? "Você" : "ProfAssistenc_IA"}
         </span>
 
       </div>
 
-
       <div
-        class="text-xs sm:text-sm text-slate-300 leading-relaxed message-content"
+        class="
+          text-xs
+          sm:text-sm
+          text-slate-300
+          leading-relaxed
+          message-content
+        "
       >
-         ${isUser ? escapeHtml(content) : renderMarkdown(content)}
+        ${isUser ? escapeHtml(content) : renderMarkdown(content)}
       </div>
 
     </div>
@@ -193,7 +216,9 @@ function addMessage(role, content, temporary = false) {
 
   chatArea.appendChild(wrapper);
 
-  lucide.createIcons();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 
   scrollChat();
 
@@ -208,51 +233,70 @@ function addLoading() {
   const wrapper = document.createElement("div");
 
   wrapper.className = "flex justify-start";
-
   wrapper.dataset.temporary = "true";
 
   wrapper.innerHTML = `
     <div
-      class="message-ai max-w-[88%] sm:max-w-[78%] rounded-2xl px-4 py-3"
+      class="
+        message-ai
+        max-w-[88%]
+        sm:max-w-[78%]
+        rounded-2xl
+        px-4
+        py-3
+      "
     >
 
-      <div
-        class="flex items-center gap-2 mb-1.5"
-      >
+      <div class="flex items-center gap-2 mb-1.5">
 
         <div
-          class="w-6 h-6 rounded-lg bg-purple-500/15 text-purple-300 flex items-center justify-center"
+          class="
+            w-6
+            h-6
+            rounded-lg
+            bg-purple-500/15
+            text-purple-300
+            flex
+            items-center
+            justify-center
+          "
         >
-
           <i
             data-lucide="sparkles"
             class="w-3.5 h-3.5"
           ></i>
-
         </div>
 
-
         <span
-          class="text-[9px] uppercase tracking-wider font-bold text-purple-300"
+          class="
+            text-[9px]
+            uppercase
+            tracking-wider
+            font-bold
+            text-purple-300
+          "
         >
-          ProfAssistenc IA
+          ProfAssistenc_IA
         </span>
 
       </div>
 
-
       <div
-        class="flex items-center gap-2 text-xs text-slate-500"
+        class="
+          flex
+          items-center
+          gap-2
+          text-xs
+          text-slate-500
+        "
       >
-
-        Gerando seu planejamento
+        Preparando seu planejamento
 
         <span class="typing-dots">
           <span></span>
           <span></span>
           <span></span>
         </span>
-
       </div>
 
     </div>
@@ -260,7 +304,9 @@ function addLoading() {
 
   chatArea.appendChild(wrapper);
 
-  lucide.createIcons();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 
   scrollChat();
 
@@ -272,7 +318,7 @@ function addLoading() {
    ========================================================= */
 
 function updateConversationTitle(firstMessage) {
-  if (!firstMessage) {
+  if (!firstMessage || !conversationTitle) {
     return;
   }
 
@@ -290,53 +336,110 @@ function getWelcomeHTML() {
   return `
     <div
       id="welcome-state"
-      class="min-h-full flex items-center justify-center py-10"
+      class="
+        min-h-full
+        flex
+        items-center
+        justify-center
+        py-10
+      "
     >
 
       <div class="max-w-2xl text-center">
 
         <div
-          class="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-400/15 flex items-center justify-center mb-5 shadow-glow"
+          class="
+            mx-auto
+            w-14
+            h-14
+            rounded-2xl
+            bg-gradient-to-br
+            from-indigo-500/20
+            to-purple-500/20
+            border
+            border-indigo-400/15
+            flex
+            items-center
+            justify-center
+            mb-5
+            shadow-glow
+          "
         >
-
           <i
             data-lucide="sparkles"
             class="w-7 h-7 text-indigo-300"
           ></i>
-
         </div>
 
-
         <p
-          class="text-[10px] uppercase tracking-[.2em] font-bold text-indigo-400 mb-2"
+          class="
+            text-[10px]
+            uppercase
+            tracking-[.2em]
+            font-bold
+            text-indigo-400
+            mb-2
+          "
         >
-          Seu assistente pedagógico
+          Assistente de Planejamento Docente
         </p>
-
 
         <h3
-          class="text-2xl sm:text-3xl font-black tracking-tight text-white"
+          class="
+            text-2xl
+            sm:text-3xl
+            font-black
+            tracking-tight
+            text-white
+          "
         >
-          O que você quer planejar hoje?
+          Vamos planejar sua aula?
         </h3>
 
-
         <p
-          class="text-xs sm:text-sm text-slate-500 mt-3 max-w-lg mx-auto leading-relaxed"
+          class="
+            text-xs
+            sm:text-sm
+            text-slate-500
+            mt-3
+            max-w-lg
+            mx-auto
+            leading-relaxed
+          "
         >
-          Peça um plano de aula, uma atividade,
-          uma sequência didática ou adapte
-          uma ideia que você já tenha.
+          Descreva o que você precisa para sua aula.
+          O ProfAssistenc IA ajuda a transformar sua ideia
+          em um planejamento claro, organizado e adequado
+          à sua turma.
         </p>
 
-
         <div
-          class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-7"
+          class="
+            grid
+            grid-cols-1
+            sm:grid-cols-3
+            gap-2.5
+            mt-7
+          "
         >
 
+          <!-- SUGESTÃO 1 -->
+
           <button
-            class="suggestion rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-left hover:border-indigo-400/30 hover:bg-indigo-500/5 transition"
-            data-suggestion="Me gere um plano de aula de Matemática sobre equações do 2º grau para o 1º ano do Ensino Médio."
+            type="button"
+            class="
+              suggestion
+              rounded-xl
+              border
+              border-slate-800
+              bg-slate-900/50
+              p-3
+              text-left
+              hover:border-indigo-400/30
+              hover:bg-indigo-500/5
+              transition
+            "
+            data-suggestion="Crie um plano de aula de Matemática sobre equações do 2º grau para o 1º ano do Ensino Médio, com objetivo, habilidades, conteúdos, metodologia, recursos, desenvolvimento e avaliação."
           >
 
             <i
@@ -345,23 +448,44 @@ function getWelcomeHTML() {
             ></i>
 
             <p
-              class="text-[11px] font-semibold text-slate-300"
+              class="
+                text-[11px]
+                font-semibold
+                text-slate-300
+              "
             >
-              Plano de aula
+              Plano completo
             </p>
 
             <p
-              class="text-[9px] text-slate-600 mt-1"
+              class="
+                text-[9px]
+                text-slate-600
+                mt-1
+              "
             >
-              Estrutura completa
+              Estrutura detalhada
             </p>
 
           </button>
 
+          <!-- SUGESTÃO 2 -->
 
           <button
-            class="suggestion rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-left hover:border-indigo-400/30 hover:bg-indigo-500/5 transition"
-            data-suggestion="Crie uma atividade prática de Ciências sobre fotossíntese para uma turma do Ensino Fundamental II."
+            type="button"
+            class="
+              suggestion
+              rounded-xl
+              border
+              border-slate-800
+              bg-slate-900/50
+              p-3
+              text-left
+              hover:border-indigo-400/30
+              hover:bg-indigo-500/5
+              transition
+            "
+            data-suggestion="Crie um plano de aula de Ciências sobre fotossíntese para uma turma do Ensino Fundamental II, incluindo uma atividade prática, os materiais necessários, o passo a passo e uma forma de avaliação."
           >
 
             <i
@@ -370,23 +494,44 @@ function getWelcomeHTML() {
             ></i>
 
             <p
-              class="text-[11px] font-semibold text-slate-300"
+              class="
+                text-[11px]
+                font-semibold
+                text-slate-300
+              "
             >
-              Atividade
+              Aula prática
             </p>
 
             <p
-              class="text-[9px] text-slate-600 mt-1"
+              class="
+                text-[9px]
+                text-slate-600
+                mt-1
+              "
             >
-              Prática e dinâmica
+              Aprender fazendo
             </p>
 
           </button>
 
+          <!-- SUGESTÃO 3 -->
 
           <button
-            class="suggestion rounded-xl border border-slate-800 bg-slate-900/50 p-3 text-left hover:border-indigo-400/30 hover:bg-indigo-500/5 transition"
-            data-suggestion="Monte uma sequência didática de História sobre a Revolução Industrial para três aulas de 50 minutos."
+            type="button"
+            class="
+              suggestion
+              rounded-xl
+              border
+              border-slate-800
+              bg-slate-900/50
+              p-3
+              text-left
+              hover:border-indigo-400/30
+              hover:bg-indigo-500/5
+              transition
+            "
+            data-suggestion="Crie um plano de aula de História sobre a Revolução Industrial para uma aula de 50 minutos, utilizando uma abordagem dinâmica e participativa, com objetivos, conteúdos, desenvolvimento, recursos e avaliação."
           >
 
             <i
@@ -395,15 +540,23 @@ function getWelcomeHTML() {
             ></i>
 
             <p
-              class="text-[11px] font-semibold text-slate-300"
+              class="
+                text-[11px]
+                font-semibold
+                text-slate-300
+              "
             >
-              Sequência didática
+              Aula dinâmica
             </p>
 
             <p
-              class="text-[9px] text-slate-600 mt-1"
+              class="
+                text-[9px]
+                text-slate-600
+                mt-1
+              "
             >
-              Várias aulas
+              Participação e interação
             </p>
 
           </button>
@@ -416,52 +569,72 @@ function getWelcomeHTML() {
   `;
 }
 
-// FUNCTION FORMAT CHARACTERS
+/* =========================================================
+   MARKDOWN
+   ========================================================= */
 
 function renderMarkdown(content) {
   if (!content) {
     return "";
   }
 
-  // Remove escapes desnecessários do Markdown
-  const normalized = content
+  let normalized = String(content);
+
+  /*
+    Remove escapes desnecessários do Markdown.
+    Mantém a estrutura original da resposta.
+  */
+
+  normalized = normalized
     .replace(/\\([*_#>\-])/g, "$1")
     .replace(/\\\[/g, "[")
     .replace(/\\\]/g, "]");
 
-  // Converte Markdown para HTML
+  if (typeof marked === "undefined" || typeof DOMPurify === "undefined") {
+    return escapeHtml(normalized).replace(/\n/g, "<br>");
+  }
+
   const html = marked.parse(normalized);
 
-  // Cria um container temporário
   const container = document.createElement("div");
+
   container.innerHTML = DOMPurify.sanitize(html);
 
-  // Renderiza fórmulas matemáticas com KaTeX
-  renderMathInElement(container, {
-    delimiters: [
-      {
-        left: "$$",
-        right: "$$",
-        display: true,
-      },
-      {
-        left: "\\(",
-        right: "\\)",
-        display: false,
-      },
-      {
-        left: "\\[",
-        right: "\\]",
-        display: true,
-      },
-      {
-        left: "$",
-        right: "$",
-        display: false,
-      },
-    ],
-    throwOnError: false,
-  });
+  /*
+    Renderização de fórmulas matemáticas.
+  */
+
+  if (typeof renderMathInElement === "function") {
+    try {
+      renderMathInElement(container, {
+        delimiters: [
+          {
+            left: "$$",
+            right: "$$",
+            display: true,
+          },
+          {
+            left: "\\(",
+            right: "\\)",
+            display: false,
+          },
+          {
+            left: "\\[",
+            right: "\\]",
+            display: true,
+          },
+          {
+            left: "$",
+            right: "$",
+            display: false,
+          },
+        ],
+        throwOnError: false,
+      });
+    } catch (error) {
+      console.warn("Não foi possível renderizar matemática:", error);
+    }
+  }
 
   return container.innerHTML;
 }
@@ -472,32 +645,46 @@ function renderMarkdown(content) {
 
 function resetChat() {
   currentConversationId = null;
-
   messages = [];
 
-  conversationTitle.textContent = "Nova conversa";
+  if (conversationTitle) {
+    conversationTitle.textContent = "Nova conversa";
+  }
 
   setStatus("Pronto");
 
-  chatArea.innerHTML = getWelcomeHTML();
+  if (chatArea) {
+    chatArea.innerHTML = initialChatHTML;
+    chatArea.scrollTop = 0;
+  }
 
   document.querySelectorAll(".history-item").forEach((item) => {
     item.classList.remove("active");
   });
 
-  input.value = "";
+  if (input) {
+    input.value = "";
+    input.disabled = false;
+  }
 
-  charCount.textContent = "0";
+  if (charCount) {
+    charCount.textContent = "0";
+  }
 
-  sendButton.disabled = true;
+  if (sendButton) {
+    sendButton.disabled = true;
+  }
 
-  lucide.createIcons();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 
   attachSuggestionEvents();
 
-  input.focus();
+  if (input) {
+    input.focus();
+  }
 }
-
 /* =========================================================
    SUGGESTIONS
    ========================================================= */
@@ -507,7 +694,11 @@ function attachSuggestionEvents() {
     button.addEventListener("click", () => {
       input.value = button.dataset.suggestion || "";
 
-      input.dispatchEvent(new Event("input"));
+      input.dispatchEvent(
+        new Event("input", {
+          bubbles: true,
+        }),
+      );
 
       input.focus();
     });
@@ -556,7 +747,6 @@ async function sendMessage() {
   isGenerating = true;
 
   sendButton.disabled = true;
-
   input.disabled = true;
 
   /* USER MESSAGE */
@@ -572,9 +762,8 @@ async function sendMessage() {
     updateConversationTitle(content);
   }
 
-  input.value = "";
-
-  charCount.textContent = "0";
+  input.value = content;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
 
   setStatus("Gerando…");
 
@@ -584,33 +773,39 @@ async function sendMessage() {
 
   try {
     console.log("Conversation ID enviado:", currentConversationId);
+
+    console.log("Mensagens enviadas:", messages);
+
     const response = await fetch(`${API_BASE}/api/LessonPlan`, {
       method: "POST",
-
       headers: {
         "Content-Type": "application/json",
       },
-
       body: JSON.stringify({
         installation_id: installationId,
-
         conversation_id: currentConversationId,
-
         message: content,
-
         messages,
       }),
     });
 
     if (!response.ok) {
-      throw new Error("Backend indisponível.");
+      const errorBody = await response.text();
+
+      throw new Error(
+        errorBody || `Backend respondeu com HTTP ${response.status}.`,
+      );
     }
 
     const data = await response.json();
+
     console.log("Resposta da API:", data);
+
     console.log("Conversation ID recebido:", data.conversationId);
+
     loading.remove();
-    const result = data.response || "Não foi possível gerar uma resposta.";;
+
+    const result = data.response || "Não foi possível gerar uma resposta.";
 
     /* AI MESSAGE */
 
@@ -622,28 +817,27 @@ async function sendMessage() {
     });
 
     if (data.conversationId) {
-    currentConversationId = data.conversationId;
+      currentConversationId = data.conversationId;
     }
 
     setStatus("Salvo");
 
     await loadHistory();
   } catch (error) {
+    console.error("Erro ao enviar mensagem:", error);
+
     loading.remove();
 
     const fallback = `
-Não foi possível conectar ao backend local.
+    Não foi possível gerar o planejamento agora.
 
-Verifique se o Flask está rodando em:
-
-http://127.0.0.1:5000
-
-Detalhe: ${error.message}
-    `.trim();
+    Verifique sua conexão e tente novamente em alguns instantes.
+  `.trim();
 
     addMessage("assistant", fallback);
 
-    setStatus("Backend offline");
+    setBackendStatus(false);
+    setStatus("Não foi possível conectar");
   } finally {
     isGenerating = false;
 
@@ -665,44 +859,57 @@ sendButton.addEventListener("click", sendMessage);
    NEW CONVERSATION
    ========================================================= */
 
-document.getElementById("btn-sidebar-new").addEventListener("click", () => {
-  resetChat();
+const newConversationButton = document.getElementById("btn-sidebar-new");
 
-  closeHistory();
-});
+if (newConversationButton) {
+  newConversationButton.addEventListener("click", () => {
+    resetChat();
+    closeHistory();
+  });
+}
 
 /* =========================================================
-   COPY
+   COPY CONVERSATION
    ========================================================= */
 
-document.getElementById("btn-copy").addEventListener("click", async () => {
-  const text = messages
-    .map(
-      (message) =>
-        `${
-          message.role === "user" ? "Você" : "ProfAssistenc IA"
-        }:\n${message.content}`,
-    )
-    .join("\n\n");
+const copyButton = document.getElementById("btn-copy");
 
-  if (!text) {
-    setStatus("Nada para copiar");
+if (copyButton) {
+  copyButton.addEventListener("click", async () => {
+    const text = messages
+      .map(
+        (message) =>
+          `${
+            message.role === "user" ? "Você" : "ProfAssistenc_IA"
+          }:\n${message.content}`,
+      )
+      .join("\n\n");
 
-    setTimeout(() => setStatus("Pronto"), 1800);
+    if (!text) {
+      setStatus("Nada para copiar");
 
-    return;
-  }
+      setTimeout(() => {
+        setStatus("Pronto");
+      }, 1800);
 
-  try {
-    await navigator.clipboard.writeText(text);
+      return;
+    }
 
-    setStatus("Conversa copiada");
+    try {
+      await navigator.clipboard.writeText(text);
 
-    setTimeout(() => setStatus("Pronto"), 1800);
-  } catch {
-    setStatus("Não foi possível copiar");
-  }
-});
+      setStatus("Conversa copiada");
+
+      setTimeout(() => {
+        setStatus("Pronto");
+      }, 1800);
+    } catch (error) {
+      console.error(error);
+
+      setStatus("Não foi possível copiar");
+    }
+  });
+}
 
 /* =========================================================
    LOAD HISTORY
@@ -717,15 +924,22 @@ async function loadHistory() {
     );
 
     if (!response.ok) {
+      setBackendStatus(false);
       return;
     }
 
     const data = await response.json();
 
+    setBackendStatus(true);
+
     renderHistory(data.conversations || []);
-  } catch {
+  } catch (error) {
+    console.error("Erro ao carregar histórico:", error);
+
+    setBackendStatus(false);
+
     /*
-      Backend offline.
+      chat offline.
       O chat continua funcionando.
     */
   }
@@ -736,25 +950,48 @@ async function loadHistory() {
    ========================================================= */
 
 function renderHistory(conversations) {
+  if (!historyList) {
+    return;
+  }
+
   if (!conversations.length) {
     historyList.innerHTML = `
       <div
-        class="empty-history rounded-xl p-4 text-center mt-1"
+        class="
+          empty-history
+          rounded-xl
+          p-4
+          text-center
+          mt-1
+        "
       >
 
         <i
           data-lucide="messages-square"
-          class="w-6 h-6 text-slate-600 mx-auto mb-2"
+          class="
+            w-6
+            h-6
+            text-slate-600
+            mx-auto
+            mb-2
+          "
         ></i>
 
         <p
-          class="text-[11px] text-slate-500"
+          class="
+            text-[11px]
+            text-slate-500
+          "
         >
           Nenhuma conversa ainda.
         </p>
 
         <p
-          class="text-[10px] text-slate-600 mt-1"
+          class="
+            text-[10px]
+            text-slate-600
+            mt-1
+          "
         >
           A primeira aparecerá aqui.
         </p>
@@ -762,7 +999,9 @@ function renderHistory(conversations) {
       </div>
     `;
 
-    lucide.createIcons();
+    if (window.lucide) {
+      lucide.createIcons();
+    }
 
     return;
   }
@@ -772,95 +1011,122 @@ function renderHistory(conversations) {
       const id = String(conversation.id);
 
       return `
+          <div
+            class="
+              history-item
+              rounded-xl
+              p-3
+              ${id === String(currentConversationId) ? "active" : ""}
+            "
+            data-id="${escapeHtml(id)}"
+          >
+
+            <button
+              type="button"
+              class="
+                history-open
+                w-full
+                text-left
+                pr-14
+              "
+            >
+
+              <div
+                class="
+                  flex
+                  items-start
+                  gap-2.5
+                "
+              >
+
+                <i
+                  data-lucide="message-square"
+                  class="
+                    w-4
+                    h-4
+                    text-slate-500
+                    mt-0.5
+                    shrink-0
+                  "
+                ></i>
+
+                <div
+                  class="min-w-0"
+                >
+
+                  <p
+                    class="
+                      text-[11px]
+                      font-semibold
+                      text-slate-300
+                      truncate
+                    "
+                  >
+                    ${escapeHtml(conversation.title || "Nova conversa")}
+                  </p>
+
+                  <p
+                    class="
+                      text-[9px]
+                      text-slate-600
+                      mt-1
+                    "
+                  >
+                    ${escapeHtml(
+                      formatConversationDate(conversation.updatedAt),
+                    )}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </button>
+
             <div
-              class="history-item rounded-xl p-3 ${
-                id === String(currentConversationId) ? "active" : ""
-              }"
-              data-id="${escapeHtml(id)}"
+              class="history-actions"
             >
 
               <button
                 type="button"
-                class="history-open w-full text-left pr-14"
+                class="
+                  history-action
+                  rename
+                "
+                title="Renomear"
+                aria-label="Renomear conversa"
               >
-
-                <div
-                  class="flex items-start gap-2.5"
-                >
-
-                  <i
-                    data-lucide="message-square"
-                    class="w-4 h-4 text-slate-500 mt-0.5 shrink-0"
-                  ></i>
-
-
-                  <div
-                    class="min-w-0"
-                  >
-
-                    <p
-                      class="text-[11px] font-semibold text-slate-300 truncate"
-                    >
-                      ${escapeHtml(conversation.title || "Nova conversa")}
-                    </p>
-
-
-                    <p
-                      class="text-[9px] text-slate-600 mt-1"
-                    >
-                      ${escapeHtml(
-                        formatConversationDate(conversation.updated_at),
-                      )}
-                    </p>
-
-                  </div>
-
-                </div>
-
+                <i
+                  data-lucide="pencil"
+                  class="w-3.5 h-3.5"
+                ></i>
               </button>
 
-
-              <div
-                class="history-actions"
+              <button
+                type="button"
+                class="
+                  history-action
+                  delete
+                "
+                title="Excluir"
+                aria-label="Excluir conversa"
               >
-
-                <button
-                  type="button"
-                  class="history-action rename"
-                  title="Renomear"
-                  aria-label="Renomear conversa"
-                >
-
-                  <i
-                    data-lucide="pencil"
-                    class="w-3.5 h-3.5"
-                  ></i>
-
-                </button>
-
-
-                <button
-                  type="button"
-                  class="history-action delete"
-                  title="Excluir"
-                  aria-label="Excluir conversa"
-                >
-
-                  <i
-                    data-lucide="trash-2"
-                    class="w-3.5 h-3.5"
-                  ></i>
-
-                </button>
-
-              </div>
+                <i
+                  data-lucide="trash-2"
+                  class="w-3.5 h-3.5"
+                ></i>
+              </button>
 
             </div>
-          `;
+
+          </div>
+        `;
     })
     .join("");
 
-  lucide.createIcons();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 
   /* EVENTS */
 
@@ -901,6 +1167,8 @@ function renderHistory(conversations) {
 
 async function loadConversation(id) {
   try {
+    setStatus("Carregando conversa…");
+
     const response = await fetch(
       `${API_BASE}/api/conversations/${encodeURIComponent(
         id,
@@ -954,7 +1222,6 @@ function openRenameModal(id, title) {
 
   setTimeout(() => {
     renameInput.focus();
-
     renameInput.select();
   }, 50);
 }
@@ -980,7 +1247,6 @@ async function renameConversation() {
 
   if (!title) {
     renameInput.focus();
-
     return;
   }
 
@@ -1020,7 +1286,9 @@ async function renameConversation() {
 
     await loadHistory();
 
-    setTimeout(() => setStatus("Pronto"), 1800);
+    setTimeout(() => {
+      setStatus("Pronto");
+    }, 1800);
   } catch (error) {
     console.error(error);
 
@@ -1063,7 +1331,9 @@ async function deleteConversation(id) {
 
     await loadHistory();
 
-    setTimeout(() => setStatus("Pronto"), 1800);
+    setTimeout(() => {
+      setStatus("Pronto");
+    }, 1800);
   } catch (error) {
     console.error(error);
 
@@ -1075,22 +1345,27 @@ async function deleteConversation(id) {
    RENAME EVENTS
    ========================================================= */
 
-document
-  .getElementById("rename-confirm")
-  .addEventListener("click", renameConversation);
+const renameConfirm = document.getElementById("rename-confirm");
 
-document
-  .getElementById("rename-cancel")
-  .addEventListener("click", closeRenameModal);
+const renameCancel = document.getElementById("rename-cancel");
 
-document
-  .getElementById("rename-close")
-  .addEventListener("click", closeRenameModal);
+const renameClose = document.getElementById("rename-close");
+
+if (renameConfirm) {
+  renameConfirm.addEventListener("click", renameConversation);
+}
+
+if (renameCancel) {
+  renameCancel.addEventListener("click", closeRenameModal);
+}
+
+if (renameClose) {
+  renameClose.addEventListener("click", closeRenameModal);
+}
 
 renameInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
-
     renameConversation();
   }
 
@@ -1114,22 +1389,32 @@ renameModal.addEventListener("click", (event) => {
    ========================================================= */
 
 function openHistory() {
+  if (!historyPanel) {
+    return;
+  }
+
   historyPanel.classList.remove("-translate-x-full");
 }
 
 function closeHistory() {
-  if (window.innerWidth < 1024) {
-    historyPanel.classList.add("-translate-x-full");
+  if (!historyPanel || window.innerWidth >= 1024) {
+    return;
   }
+
+  historyPanel.classList.add("-translate-x-full");
 }
 
-document
-  .getElementById("btn-history-mobile")
-  .addEventListener("click", openHistory);
+const mobileHistoryButton = document.getElementById("btn-history-mobile");
 
-document
-  .getElementById("btn-close-history")
-  .addEventListener("click", closeHistory);
+const closeHistoryButton = document.getElementById("btn-close-history");
+
+if (mobileHistoryButton) {
+  mobileHistoryButton.addEventListener("click", openHistory);
+}
+
+if (closeHistoryButton) {
+  closeHistoryButton.addEventListener("click", closeHistory);
+}
 
 /* =========================================================
    ESCAPE
@@ -1140,7 +1425,7 @@ document.addEventListener("keydown", (event) => {
     return;
   }
 
-  if (!renameModal.classList.contains("hidden")) {
+  if (renameModal && !renameModal.classList.contains("hidden")) {
     closeRenameModal();
   }
 });
@@ -1149,8 +1434,18 @@ document.addEventListener("keydown", (event) => {
    INITIALIZATION
    ========================================================= */
 
-lucide.createIcons();
+function initializeApp() {
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 
-attachSuggestionEvents();
+  attachSuggestionEvents();
 
-loadHistory();
+  loadHistory();
+
+  if (input) {
+    input.focus();
+  }
+}
+
+initializeApp();
