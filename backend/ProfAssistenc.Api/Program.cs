@@ -10,6 +10,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=profassistenc.db"));
 builder.Services.AddScoped<LessonPlanService>();
 builder.Services.AddScoped<AIService>();
+builder.Services.AddScoped<ConversationService>();
 builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
 {

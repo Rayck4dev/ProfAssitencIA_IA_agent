@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using ProfAssistenc.Api.Models;
+﻿using ProfAssistenc.Api.Models;
 
 namespace ProfAssistenc.Api.Services
 {
@@ -29,7 +28,7 @@ namespace ProfAssistenc.Api.Services
                 Console.WriteLine("----------------------");
             }
 
-           string aiReturn = await _aiService.GenerateResponse(history);
+           string? aiReturn = await _aiService.GenerateResponse(history);
            result.Response = aiReturn;
            return result;
         }

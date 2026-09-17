@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using ProfAssistenc.Api.Data;
 using ProfAssistenc.Api.Entities;
 using ProfAssistenc.Api.Models;
@@ -17,17 +16,20 @@ namespace ProfAssistenc.Api.Controllers
             _appDbContext = appDbContext;
         }
         [HttpGet]
-        public async Task<IActionResult> GenerateConversations(string installation_id)
+        public async Task<IActionResult> GetConversations(string installation_id)
         {
-            var installationConversations = await _appDbContext.Conversations.Where(c => c.InstallationId == installation_id).ToListAsync();
-            return Ok(installationConversations);
+            var installationConversations = await _appDbContext.Conversations
+                .Where(c => c.InstallationId == installation_id)
+                .ToListAsync();
+            return Ok( new { conversations = installationConversations});
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetConversationById(int id)
+        public async Task<IActionResult> GetConversationById(int id, string installation_id)
         {
-            Conversation? conversation = _appDbContext.Conversations
+            Conversation? conversation = await _appDbContext.Conversations
+                .Where(c => c.InstallationId == installation_id)
                 .Include(c => c.Messages)
-                .FirstOrDefault(c => c.Id == id);
+                .FirstOrDefaultAsync(c => c.Id == id);
             if (conversation == null)
             {
                 return NotFound("Conversa nao encontrada");
@@ -37,15 +39,28 @@ namespace ProfAssistenc.Api.Controllers
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateConversationTitle(int id, UpdateConversationRequest request)
         {
-            var titleConversation = await _appDbContext.Conversations
+            var conversation = await _appDbContext.Conversations
+                .Where(c => c.InstallationId == request.installation_id)
                 .FirstOrDefaultAsync(c => c.Id == id);
-            if (titleConversation == null)
+            if (conversation == null)
             {
                 return NotFound("Conversa nao encontrada");
             }
-            titleConversation.Title = request.Title;
+            conversation.Title = request.Title;
+            conversation.UpdatedAt = DateTime.UtcNow;
             await _appDbContext.SaveChangesAsync();
-            return Ok(titleConversation);
+            return Ok(conversation);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteConversationById(int id, string installation_id)
+        {
+            Conversation? conversation = await _appDbContext.Conversations
+           .Where(c => c.InstallationId == installation_id)
+           .FirstOrDefaultAsync(c => c.Id == id);
+            if (conversation == null) { return NotFound("Conversa nao encontrada"); }
+            _appDbContext.Conversations.Remove(conversation);
+            await _appDbContext.SaveChangesAsync();
+            return Ok(conversation);
         }
     }
 }

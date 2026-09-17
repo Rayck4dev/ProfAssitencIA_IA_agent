@@ -8,12 +8,20 @@ namespace ProfAssistenc.Api.Services
     {
         private HttpClient _httpClient;
         private IConfiguration _configuration;
+        private string _url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
+        private JsonSerializerOptions _options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+        private string? _apiKey;
         public AIService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _configuration = configuration;
+            _apiKey = _configuration.GetSection("Gemini:ApiKey").Value;
         }
-        public async Task<string> GenerateResponse(List<Message> history)
+        
+        public async Task<string?> GenerateResponse(List<Message> history)
         {
             List<GeminiContent> contents = new List<GeminiContent>();
             foreach (Message message in history)
@@ -36,50 +44,86 @@ namespace ProfAssistenc.Api.Services
                 contents = contents
             };
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
-            string jsonString = JsonSerializer.Serialize(payload, options);
-            var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
+            string jsonString = JsonSerializer.Serialize(payload, _options);
             var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
-            var apiKey = _configuration.GetSection("Gemini:ApiKey").Value;
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, url);
-                request.Headers.Add("x-goog-api-key", apiKey);
+                var request = new HttpRequestMessage(HttpMethod.Post, _url);
+                request.Headers.Add("x-goog-api-key", _apiKey);
                 request.Content = content;
-                HttpResponseMessage httpResponse = await _httpClient.SendAsync(request); 
-                Console.WriteLine(jsonString);
-
+                HttpResponseMessage httpResponse = await _httpClient.SendAsync(request);
                 string responseBody = await httpResponse.Content.ReadAsStringAsync();
-                if (!httpResponse.IsSuccessStatusCode)
-                {
-                    return $"Erro do Gemini: {httpResponse.StatusCode} - {responseBody}";
-                }
-
-                Console.WriteLine("RESPOSTA DO GEMINI:");
-                Console.WriteLine(responseBody);
-
-                var gResponse = JsonSerializer.Deserialize<GeminiResponse>(responseBody, options);
-                Console.WriteLine(gResponse == null);
-                Console.WriteLine(gResponse?.Candidates == null);
-
-                var firstCandidate = gResponse.Candidates.FirstOrDefault();
-                var candidateContent = firstCandidate.content;
-                var parts = candidateContent.parts;
-                var firstParts = parts.FirstOrDefault();
-                string textPart = firstParts.text;
-                Console.WriteLine(httpResponse);
-                Console.WriteLine(responseBody);
-                return textPart;
+                if (!httpResponse.IsSuccessStatusCode) return null;
+                return ExtractResponseText(responseBody);
 
             }
             catch(HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
-                return $"Erro na requisicao {e.Message}";
+                return null;
             }
+        }
+        public async Task<string?> GenerateTitle(Message message)
+        {
+            GeminiContent content = new GeminiContent();
+            content.Role = "user";
+
+            Part newPart = new Part();
+            newPart.text = $"Gere um título curto e objetivo para esta conversa com base na mensagem do usuário. Retorne apenas o título, sem explicações e com no máximo 8 palavras. {message.Content}";
+            List<Part> lPart = new List<Part>();
+            lPart.Add(newPart);
+            content.Parts = lPart;
+
+            List<GeminiContent> gmList = new List<GeminiContent>();
+            gmList.Add(content);
+            var payload = new
+            {
+                contents = gmList
+            };
+
+            string jsonString = JsonSerializer.Serialize(payload, _options);
+            var contentJSON = new StringContent(jsonString, Encoding.UTF8, "application/json");
+            try 
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, _url);
+                request.Headers.Add("x-goog-api-key", _apiKey);
+                request.Content = contentJSON;
+                HttpResponseMessage httpResponse = await _httpClient.SendAsync(request);
+                string responseBody = await httpResponse.Content.ReadAsStringAsync();
+                if (!httpResponse.IsSuccessStatusCode) return null;
+                return ExtractResponseText(responseBody);
+
+            }
+            catch(HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+            
+        }
+        private string? ExtractResponseText(string responseBody)
+        {
+            try
+            {
+                var gResponse = JsonSerializer.Deserialize<GeminiResponse>(responseBody, _options);
+
+                if (gResponse == null || gResponse.Candidates == null) return null;
+                var firstCandidate = gResponse.Candidates.FirstOrDefault();
+                if (firstCandidate == null) return null;
+                var candidateContent = firstCandidate.content;
+                var parts = candidateContent.parts;
+                var firstParts = parts.FirstOrDefault();
+                if (firstParts == null) return null;
+                if (string.IsNullOrWhiteSpace(firstParts.text)) return null;
+                string textPart = firstParts.text;
+                return textPart;
+            }
+            catch(JsonException e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+            
         }
     }
 }

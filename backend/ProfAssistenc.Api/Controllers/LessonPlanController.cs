@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
+﻿using Microsoft.AspNetCore.Mvc;
 using ProfAssistenc.Api.Data;
 using ProfAssistenc.Api.Entities;
 using ProfAssistenc.Api.Models;
@@ -12,16 +10,20 @@ namespace ProfAssistenc.Api.Controllers
     [ApiController]
     public class LessonPlanController : ControllerBase
     {
+        private readonly LessonPlanService _lessonPlanService;
 
-        private LessonPlanService _lessonPlanService;
-        private AppDbContext _appDbContext;
+        private readonly AppDbContext _appDbContext;
 
-        
+        private readonly AIService _aiService;
 
-        public LessonPlanController(LessonPlanService lessonPlanService, AppDbContext appDbContext)
+        private readonly ConversationService _conversationService;
+
+        public LessonPlanController(LessonPlanService lessonPlanService, AppDbContext appDbContext, AIService aiService, ConversationService conversationService)
         {
             _lessonPlanService = lessonPlanService;
             _appDbContext = appDbContext;
+            _aiService = aiService;
+            _conversationService = conversationService;
         }
 
         [HttpPost]
@@ -33,68 +35,28 @@ namespace ProfAssistenc.Api.Controllers
                 return  BadRequest("Mensagem vazia");
             }
             int conversationId = 0;
-            if(request.conversation_id == null)
-            {
-                Conversation newConversation = new Conversation();
-
-                newConversation.InstallationId = request.installation_id;
-                
-                _appDbContext.Conversations.Add(newConversation);
-                newConversation.Title = "Nova conversa";
-                await _appDbContext.SaveChangesAsync();
-
-                conversationId = newConversation.Id;
-
-                MessageEntity newMessage = new MessageEntity();
-
-                newMessage.ConversationId = newConversation.Id;
-                newMessage.Role = "user";
-                newMessage.Content = request.message;
-                Console.WriteLine(newConversation.Title);
-                _appDbContext.MessageEntities.Add(newMessage);
-
-                await _appDbContext.SaveChangesAsync();
-            }
-            List<Message> historico = new List<Message>();
+           
+            List<Message> history = new List<Message>();
 
             if (request.conversation_id != null)
             {
                 string conversationIdString = request.conversation_id;
 
-                if (int.TryParse(conversationIdString, out int resultado))
+                if (int.TryParse(conversationIdString, out int parsedConversationId))
                 {
-                    Conversation? conversation = _appDbContext.Conversations
-                        .FirstOrDefault(c => c.Id == resultado);
+                    Conversation? conversation = await _conversationService.GetConversationById(
+                        parsedConversationId,
+                        request.installation_id
+                    );
 
                     if (conversation == null)
                     {
                         return NotFound("Conversa nao encontrada");
                     }
 
-                    List<MessageEntity> mensagens = _appDbContext.MessageEntities
-                        .Where(c => c.ConversationId == conversation.Id)
-                        .ToList();
-
-                    foreach (MessageEntity mensagem in mensagens)
-                    {
-                        Message novaMensagem = new Message();
-
-                        novaMensagem.Role = mensagem.Role;
-                        novaMensagem.Content = mensagem.Content;
-
-                        historico.Add(novaMensagem);
-                    }
-
-                    MessageEntity newChat = new MessageEntity();
-
-                    newChat.ConversationId = conversation.Id;
-                    newChat.Role = "user";
-                    newChat.Content = request.message;
-
-                    _appDbContext.MessageEntities.Add(newChat);
-
-                    await _appDbContext.SaveChangesAsync();
+                    history = await _conversationService.GetConversationHistory(conversation.Id);
                     conversationId = conversation.Id;
+                    await _conversationService.AddUserMessage(conversationId, request.message);
                 }
                 else
                 {
@@ -102,19 +64,45 @@ namespace ProfAssistenc.Api.Controllers
                 }
             }
 
-            LessonPlanResult resultadoIA = await _lessonPlanService.ProfMessage(request.message, historico);
+            LessonPlanResult aiResult = await _lessonPlanService.ProfMessage(request.message, history);
+            if (aiResult.Response == null) return StatusCode(502, "Não foi possível obter uma resposta da IA.");
+            if (request.conversation_id == null)
+            {
+                Conversation newConversation = new Conversation();
 
-            MessageEntity respostaIA = new MessageEntity();
+                newConversation.InstallationId = request.installation_id;
+                newConversation.UpdatedAt = DateTime.UtcNow;
+                _appDbContext.Conversations.Add(newConversation);
+                newConversation.Title = "Nova conversa";
+                await _appDbContext.SaveChangesAsync();
 
-            respostaIA.ConversationId = conversationId;
-            respostaIA.Role = "assistant";
-            respostaIA.Content = resultadoIA.Response;
+                conversationId = newConversation.Id;
 
-            _appDbContext.MessageEntities.Add(respostaIA);
+                await _conversationService.AddUserMessage(conversationId, request.message );
+
+                Message firstMessage = new Message();
+                firstMessage.Role = "user";
+                firstMessage.Content = request.message;
+
+                string? title = await _aiService.GenerateTitle(firstMessage);
+                if (title != null)
+                {
+                    newConversation.Title = title;
+                    await _appDbContext.SaveChangesAsync();
+                }
+
+            }
+            MessageEntity aiMessage = new MessageEntity();
+
+            aiMessage.ConversationId = conversationId;
+            aiMessage.Role = "assistant";
+            aiMessage.Content = aiResult.Response;
+
+            _appDbContext.MessageEntities.Add(aiMessage);
 
             await _appDbContext.SaveChangesAsync();
-            resultadoIA.ConversationId = conversationId.ToString();
-            return Ok(resultadoIA);
+            aiResult.ConversationId = conversationId.ToString();
+            return Ok(aiResult);
         }
 
     } 
