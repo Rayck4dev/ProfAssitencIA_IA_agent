@@ -1,2 +1,17 @@
-backend/
-main.py
+# .NET
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets
+.env
+.env.*

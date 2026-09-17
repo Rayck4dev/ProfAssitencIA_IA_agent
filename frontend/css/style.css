@@ -19,13 +19,26 @@ body,
   overflow: hidden;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   min-height: 100vh;
   margin: 0;
-  background: #080c14;
+
+  background:
+    radial-gradient(
+      circle at 72% 20%,
+      rgba(79, 70, 229, 0.06),
+      transparent 34%
+    ),
+    #080c14;
+
   color: #f8fafc;
 
   font-family:
+    "DM Sans",
     Inter,
     ui-sans-serif,
     system-ui,
@@ -33,7 +46,33 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.28);
+  color: #fff;
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
 
 .app {
   height: 100vh;
@@ -59,12 +98,20 @@ body {
    ========================================================= */
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.78);
+  background: linear-gradient(
+    145deg,
+    rgba(17, 24, 39, 0.78),
+    rgba(10, 14, 24, 0.82)
+  );
 
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 
 /* =========================================================
@@ -74,25 +121,40 @@ body {
 .glass-input {
   width: 100%;
 
-  background: rgba(30, 41, 59, 0.68);
+  background: linear-gradient(
+    145deg,
+    rgba(22, 30, 48, 0.76),
+    rgba(15, 23, 42, 0.72)
+  );
 
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
   color: #f8fafc;
 
-  transition: 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.glass-input:hover {
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .glass-input:focus {
   outline: none;
 
-  background: rgba(30, 41, 59, 0.92);
+  background: linear-gradient(
+    145deg,
+    rgba(25, 34, 54, 0.88),
+    rgba(17, 25, 43, 0.86)
+  );
 
-  border-color: rgba(129, 140, 248, 0.8);
+  border-color: rgba(129, 140, 248, 0.55);
 
   box-shadow:
-    0 0 0 3px rgba(99, 102, 241, 0.1),
-    0 0 18px rgba(99, 102, 241, 0.12);
+    0 0 0 3px rgba(99, 102, 241, 0.08),
+    0 10px 35px rgba(0, 0, 0, 0.12);
 }
 
 .glass-input::placeholder {
@@ -100,8 +162,290 @@ body {
 }
 
 textarea.glass-input {
-  resize: vertical;
-  min-height: 92px;
+  resize: none;
+  min-height: 88px;
+}
+
+/* =========================================================
+   COMPOSER
+   ========================================================= */
+
+.composer-area {
+  position: relative;
+}
+
+.composer-shell {
+  width: min(100%, 980px);
+  margin: 0 auto;
+}
+
+.composer-context {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  min-height: 24px;
+
+  padding: 0 3px 8px;
+
+  font-size: 10px;
+}
+
+.composer-context-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+.composer-context-separator {
+  color: #334155;
+}
+
+.composer-context-muted {
+  color: #64748b;
+}
+
+.composer-input {
+  min-height: 82px !important;
+  max-height: 150px;
+}
+
+/* =========================================================
+   WELCOME
+   ========================================================= */
+
+.welcome-state {
+  width: 100%;
+  min-height: 100%;
+}
+
+.welcome-content {
+  width: min(100%, 950px);
+  margin: 0 auto;
+}
+
+.welcome-icon {
+  box-shadow:
+    0 0 0 6px rgba(99, 102, 241, 0.025),
+    0 12px 35px rgba(79, 70, 229, 0.08);
+}
+
+.welcome-title {
+  font-family: "Plus Jakarta Sans", "DM Sans", Inter, sans-serif;
+
+  line-height: 1.15;
+}
+
+.welcome-description {
+  color: #64748b;
+}
+
+/* =========================================================
+   CONTEXT PILLS
+   ========================================================= */
+
+.context-pills {
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: 6px 9px;
+
+  border-radius: 11px;
+
+  background: rgba(15, 23, 42, 0.52);
+
+  border: 1px solid rgba(255, 255, 255, 0.055);
+}
+
+.context-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 3px 6px;
+
+  color: #64748b;
+
+  font-size: 9px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+.context-pill svg {
+  color: #818cf8;
+  opacity: 0.9;
+}
+
+.context-divider {
+  width: 1px;
+  height: 13px;
+
+  background: rgba(148, 163, 184, 0.12);
+}
+
+/* =========================================================
+   SUGGESTIONS
+   ========================================================= */
+
+.suggestions-wrapper {
+  width: 100%;
+}
+
+.suggestions-heading {
+  padding-left: 1px;
+}
+
+.suggestion-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 9px;
+}
+
+/* =========================================================
+   COMPACT SUGGESTION CARD
+   ========================================================= */
+
+.suggestion-card {
+  position: relative;
+
+  min-width: 0;
+  min-height: 76px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 12px;
+
+  text-align: left;
+
+  border-radius: 13px;
+
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.68),
+    rgba(12, 18, 31, 0.58)
+  );
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+
+  color: #cbd5e1;
+
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.suggestion-card:hover {
+  background: linear-gradient(
+    145deg,
+    rgba(30, 41, 70, 0.68),
+    rgba(17, 24, 39, 0.7)
+  );
+
+  border-color: rgba(129, 140, 248, 0.25);
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.suggestion-card:active {
+  transform: translateY(0) scale(0.995);
+}
+
+/* =========================================================
+   SUGGESTION ICON
+   ========================================================= */
+
+.suggestion-icon {
+  width: 32px;
+  height: 32px;
+
+  flex: 0 0 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  color: #a5b4fc;
+
+  background: rgba(99, 102, 241, 0.09);
+
+  border: 1px solid rgba(129, 140, 248, 0.08);
+}
+
+.suggestion-card:nth-child(2) .suggestion-icon {
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.suggestion-card:nth-child(3) .suggestion-icon {
+  color: #c4b5fd;
+  background: rgba(139, 92, 246, 0.08);
+}
+
+/* =========================================================
+   SUGGESTION CONTENT
+   ========================================================= */
+
+.suggestion-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.suggestion-content strong {
+  display: block;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: #cbd5e1;
+
+  font-size: 11px;
+  font-weight: 650;
+
+  line-height: 1.3;
+}
+
+.suggestion-content small {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #64748b;
+
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.suggestion-arrow {
+  flex: 0 0 auto;
+
+  color: #475569;
+
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.suggestion-card:hover .suggestion-arrow {
+  color: #818cf8;
+  transform: translate(1px, -1px);
 }
 
 /* =========================================================
@@ -121,15 +465,15 @@ textarea.glass-input {
 }
 
 .history-item:hover {
-  background: rgba(51, 65, 85, 0.42);
+  background: rgba(51, 65, 85, 0.34);
 
-  border-color: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.055);
 }
 
 .history-item.active {
-  background: rgba(99, 102, 241, 0.11);
+  background: rgba(99, 102, 241, 0.1);
 
-  border-color: rgba(129, 140, 248, 0.22);
+  border-color: rgba(129, 140, 248, 0.2);
 }
 
 /* =========================================================
@@ -148,6 +492,7 @@ textarea.glass-input {
 
   display: flex;
   align-items: center;
+
   gap: 2px;
 
   padding: 3px;
@@ -192,7 +537,9 @@ textarea.glass-input {
 
   color: #64748b;
 
-  transition: 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .history-action:hover {
@@ -212,9 +559,9 @@ textarea.glass-input {
    ========================================================= */
 
 .empty-history {
-  border: 1px dashed rgba(148, 163, 184, 0.18);
+  border: 1px dashed rgba(148, 163, 184, 0.15);
 
-  background: rgba(15, 23, 42, 0.32);
+  background: rgba(15, 23, 42, 0.25);
 }
 
 /* =========================================================
@@ -222,15 +569,27 @@ textarea.glass-input {
    ========================================================= */
 
 .message-user {
-  background: rgba(99, 102, 241, 0.12);
+  background: linear-gradient(
+    145deg,
+    rgba(79, 70, 229, 0.15),
+    rgba(99, 102, 241, 0.08)
+  );
 
   border: 1px solid rgba(129, 140, 248, 0.15);
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 .message-ai {
-  background: rgba(15, 23, 42, 0.75);
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.78),
+    rgba(12, 18, 31, 0.7)
+  );
 
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.065);
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 /* =========================================================
@@ -239,6 +598,174 @@ textarea.glass-input {
 
 .message-content {
   word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   MARKDOWN
+   ========================================================= */
+
+.message-content p {
+  margin: 0 0 10px;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.message-content strong {
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+.message-content em {
+  color: #cbd5e1;
+}
+
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4 {
+  margin-top: 18px;
+  margin-bottom: 8px;
+
+  color: #f8fafc;
+
+  line-height: 1.3;
+}
+
+.message-content h1:first-child,
+.message-content h2:first-child,
+.message-content h3:first-child,
+.message-content h4:first-child {
+  margin-top: 0;
+}
+
+.message-content h1 {
+  font-size: 18px;
+}
+
+.message-content h2 {
+  font-size: 16px;
+}
+
+.message-content h3 {
+  font-size: 14px;
+}
+
+.message-content h4 {
+  font-size: 13px;
+}
+
+.message-content ul,
+.message-content ol {
+  margin: 8px 0 12px;
+
+  padding-left: 20px;
+}
+
+.message-content li {
+  margin: 4px 0;
+}
+
+.message-content ul li::marker {
+  color: #818cf8;
+}
+
+.message-content ol li::marker {
+  color: #818cf8;
+  font-weight: 700;
+}
+
+.message-content blockquote {
+  margin: 12px 0;
+
+  padding: 9px 12px;
+
+  border-left: 2px solid rgba(129, 140, 248, 0.45);
+
+  background: rgba(99, 102, 241, 0.05);
+
+  color: #94a3b8;
+}
+
+.message-content code {
+  padding: 2px 5px;
+
+  border-radius: 5px;
+
+  background: rgba(15, 23, 42, 0.9);
+
+  color: #c4b5fd;
+
+  font-size: 0.9em;
+}
+
+.message-content pre {
+  margin: 12px 0;
+
+  padding: 13px;
+
+  overflow-x: auto;
+
+  border-radius: 10px;
+
+  background: #080c14;
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.message-content pre code {
+  padding: 0;
+
+  background: transparent;
+
+  color: #cbd5e1;
+}
+
+.message-content hr {
+  margin: 16px 0;
+
+  border: 0;
+
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.message-content a {
+  color: #a5b4fc;
+  text-decoration: underline;
+  text-decoration-color: rgba(165, 180, 252, 0.3);
+}
+
+.message-content table {
+  width: 100%;
+
+  margin: 12px 0;
+
+  border-collapse: collapse;
+
+  font-size: 11px;
+}
+
+.message-content th,
+.message-content td {
+  padding: 7px 9px;
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+
+  text-align: left;
+}
+
+.message-content th {
+  background: rgba(99, 102, 241, 0.07);
+
+  color: #cbd5e1;
+
+  font-weight: 700;
+}
+
+.message-content td {
+  color: #94a3b8;
 }
 
 /* =========================================================
@@ -250,17 +777,22 @@ textarea.glass-input {
 
   overflow: hidden;
 
-  transition: 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
 }
 
-.btn-neon:hover {
+.btn-neon:not(:disabled):hover {
   transform: translateY(-1px);
 
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.22);
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.2);
 }
 
-.btn-neon:active {
+.btn-neon:not(:disabled):active {
   transform: translateY(0);
+
+  filter: brightness(0.95);
 }
 
 /* =========================================================
@@ -269,7 +801,7 @@ textarea.glass-input {
 
 .dot-grid {
   background-image: radial-gradient(
-    rgba(148, 163, 184, 0.1) 1px,
+    rgba(148, 163, 184, 0.09) 1px,
     transparent 1px
   );
 
@@ -317,7 +849,7 @@ textarea.glass-input {
 .rename-card {
   width: min(420px, 100%);
 
-  background: #0f172a;
+  background: linear-gradient(145deg, #111827, #0f172a);
 
   border: 1px solid rgba(129, 140, 248, 0.18);
 
@@ -355,6 +887,24 @@ textarea.glass-input {
     opacity: 1;
 
     transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================================
+   WELCOME ANIMATION
+   ========================================================= */
+
+@keyframes welcomeAppear {
+  from {
+    opacity: 0;
+
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
   }
 }
 
@@ -409,15 +959,16 @@ textarea.glass-input {
 
 #chat-area {
   min-height: 0;
+
   overflow-y: auto;
   overflow-x: hidden;
 
-  /* Firefox */
   scrollbar-width: thin;
-  scrollbar-color: rgba(129, 140, 248, 0.35) transparent;
+  scrollbar-color: rgba(129, 140, 248, 0.3) transparent;
 }
 
 /* Chrome / Edge / Safari */
+
 #chat-area::-webkit-scrollbar {
   width: 6px;
 }
@@ -427,12 +978,40 @@ textarea.glass-input {
 }
 
 #chat-area::-webkit-scrollbar-thumb {
-  background: rgba(129, 140, 248, 0.35);
+  background: rgba(129, 140, 248, 0.3);
+
   border-radius: 999px;
 }
 
-#chat-area::-webkit-scrollbar-thumb:hover {
-  background: rgba(129, 140, 248, 0.6);
+/* =========================================================
+Message Input - SCROLLBAR
+========================================================= */
+
+#message-input {
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  scrollbar-width: thin;
+
+  scrollbar-color: rgba(129, 140, 248, 0.3) transparent;
+}
+
+/* Chrome / Edge / Safari */
+
+#message-input::-webkit-scrollbar {
+  width: 6px;
+}
+
+#message-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#message-input::-webkit-scrollbar-thumb {
+  background: rgba(129, 140, 248, 0.3);
+
+  border-radius: 999px;
 }
 
 /* =========================================================
@@ -452,7 +1031,7 @@ textarea.glass-input {
 }
 
 /* =========================================================
-   SUGGESTION CARDS
+   SUGGESTION COMPATIBILITY
    ========================================================= */
 
 .suggestion {
@@ -461,8 +1040,10 @@ textarea.glass-input {
   user-select: none;
 }
 
-.suggestion:active {
-  transform: scale(0.99);
+.suggestion:focus-visible {
+  outline: 2px solid rgba(129, 140, 248, 0.65);
+
+  outline-offset: 2px;
 }
 
 /* =========================================================
@@ -478,12 +1059,26 @@ textarea.glass-input {
 }
 
 /* =========================================================
-   MOBILE
+   MOBILE HISTORY
    ========================================================= */
 
 @media (max-width: 1023px) {
   #history-panel {
     box-shadow: 20px 0 50px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .suggestion-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .suggestion-card {
+    min-height: 68px;
   }
 }
 
@@ -503,6 +1098,99 @@ textarea.glass-input {
   .message-user,
   .message-ai {
     max-width: 92%;
+  }
+
+  .welcome-state {
+    align-items: flex-start;
+  }
+
+  .welcome-title {
+    font-size: 25px;
+  }
+
+  .welcome-description {
+    font-size: 12px;
+  }
+
+  .context-pills {
+    width: 100%;
+
+    justify-content: center;
+
+    padding: 6px;
+  }
+
+  .context-divider {
+    display: none;
+  }
+
+  .context-pill {
+    font-size: 8px;
+  }
+
+  .suggestion-grid {
+    gap: 7px;
+  }
+
+  .suggestion-card {
+    min-height: 64px;
+
+    padding: 10px;
+  }
+
+  .suggestion-icon {
+    width: 30px;
+    height: 30px;
+
+    flex-basis: 30px;
+  }
+
+  .suggestion-content strong {
+    font-size: 10px;
+  }
+
+  .suggestion-content small {
+    font-size: 8px;
+  }
+
+  .composer-context {
+    font-size: 9px;
+  }
+
+  .composer-context-muted {
+    display: none;
+  }
+
+  .composer-context-separator {
+    display: none;
+  }
+
+  .composer-input {
+    min-height: 78px !important;
+  }
+}
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+  .context-pills {
+    gap: 2px;
+  }
+
+  .context-pill {
+    padding: 3px 4px;
+
+    font-size: 7.5px;
+  }
+
+  .suggestion-content small {
+    display: none;
+  }
+
+  .suggestion-card {
+    min-height: 58px;
   }
 }
 
@@ -529,6 +1217,7 @@ input:focus-visible {
     scroll-behavior: auto !important;
 
     animation-duration: 0.01ms !important;
+
     animation-iteration-count: 1 !important;
 
     transition-duration: 0.01ms !important;
