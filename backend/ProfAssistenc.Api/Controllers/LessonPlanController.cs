@@ -56,7 +56,6 @@ namespace ProfAssistenc.Api.Controllers
 
                     history = await _conversationService.GetConversationHistory(conversation.Id);
                     conversationId = conversation.Id;
-                    await _conversationService.AddUserMessage(conversationId, request.message);
                 }
                 else
                 {
@@ -91,6 +90,9 @@ namespace ProfAssistenc.Api.Controllers
                     await _appDbContext.SaveChangesAsync();
                 }
 
+            } else
+            {
+                await _conversationService.AddUserMessage(conversationId, request.message);
             }
             MessageEntity aiMessage = new MessageEntity();
 
@@ -103,7 +105,7 @@ namespace ProfAssistenc.Api.Controllers
             await _appDbContext.SaveChangesAsync();
             aiResult.ConversationId = conversationId.ToString();
             return Ok(aiResult);
-        }
+        } 
 
     } 
 }

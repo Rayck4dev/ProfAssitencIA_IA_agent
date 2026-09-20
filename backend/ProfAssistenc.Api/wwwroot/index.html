@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>ProfAssistenc IA — Assistente de Planejamento Docente</title>
+
+    <link rel="icon" href="../assets/favicon.png" />
+
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+              },
+
+              glow: {
+                purple: "#a855f7",
+                pink: "#ec4899",
+              },
+            },
+
+            boxShadow: {
+              glow: "0 0 30px rgba(99,102,241,.16)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+
+  <body class="min-h-screen overflow-x-hidden">
+    <!-- =====================================================
+         BACKGROUND
+         ===================================================== -->
+
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+      <div
+        class="absolute -top-48 -left-40 w-[520px] h-[520px] rounded-full bg-indigo-600/10 blur-[150px]"
+      ></div>
+
+      <div
+        class="absolute -bottom-56 -right-40 w-[600px] h-[600px] rounded-full bg-purple-600/8 blur-[170px]"
+      ></div>
+
+      <div class="absolute inset-0 dot-grid opacity-30"></div>
+    </div>
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="relative z-50 sm:px-1 py-1 bg-[#080c14]/45 backdrop-blur-sm">
+      <div
+        class="max-w-[1500px] mx-auto glass-card rounded-2xl sm:px-5 py-2.5 m-1 flex items-center justify-between shadow-2xl"
+      >
+        <!-- LOGO -->
+
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-500 p-[1px] shadow-glow"
+          >
+            <div
+              class="w-full h-full rounded-[11px] bg-[#080c14] flex items-center justify-center"
+            >
+              <i data-lucide="sparkles" class="w-5 h-5 text-indigo-300"></i>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="font-black tracking-tight text-lg">ProfAssistenc</h1>
+
+              <span
+                class="font-black text-lg bg-gradient-to-r from-indigo-300 via-purple-400 to-indigo-300 bg-clip-text text-transparent"
+              >
+                IA
+              </span>
+            </div>
+
+            <p
+              class="text-[9px] sm:text-[10px] uppercase tracking-[.16em] text-slate-500 font-semibold"
+            >
+              Assistente de Planejamento Docente
+            </p>
+          </div>
+        </div>
+
+        <!-- STATUS -->
+
+        <div class="flex items-center gap-2">
+          <button
+            id="btn-history-mobile"
+            type="button"
+            class="lg:hidden h-9 w-9 rounded-xl bg-slate-900/70 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition"
+            aria-label="Abrir histórico"
+          >
+            <i data-lucide="history" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
+
+    <main
+      class="relative z-10 max-w-[1500px] mx-auto w-full h-[calc(100vh-86px)] min-h-0"
+    >
+      <div
+        class="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)] gap-4 h-full min-h-0"
+      >
+        <!-- =================================================
+             HISTORY
+             ================================================= -->
+
+        <aside
+          id="history-panel"
+          class="fixed lg:static z-[70] lg:z-auto inset-y-0 left-0 w-[290px] lg:w-auto bg-[#080c14] lg:bg-transparent p-3 lg:p-0 transform -translate-x-full lg:transform-none transition-transform duration-200"
+        >
+          <div
+            class="glass-card rounded-2xl h-full flex flex-col overflow-hidden"
+          >
+            <!-- HISTORY HEADER -->
+
+            <div
+              class="p-4 border-b border-slate-800/80 flex items-center justify-between"
+            >
+              <div>
+                <p
+                  class="text-xs font-bold text-slate-200 flex items-center gap-2"
+                >
+                  <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i>
+
+                  Histórico
+                </p>
+
+                <p class="text-[10px] text-slate-500 mt-1">
+                  Suas conversas salvas
+                </p>
+              </div>
+
+              <button
+                id="btn-close-history"
+                type="button"
+                class="lg:hidden w-8 h-8 rounded-lg hover:bg-slate-800 text-slate-400"
+                aria-label="Fechar histórico"
+              >
+                <i data-lucide="x" class="w-4 h-4 mx-auto"></i>
+              </button>
+            </div>
+
+            <!-- NEW CONVERSATION -->
+
+            <div class="p-3">
+              <button
+                id="btn-sidebar-new"
+                type="button"
+                class="w-full h-9 rounded-xl border border-dashed border-indigo-400/25 bg-indigo-500/5 text-indigo-300 text-xs font-semibold hover:bg-indigo-500/10 transition flex items-center justify-center gap-2"
+              >
+                <i data-lucide="message-square-plus" class="w-4 h-4"></i>
+
+                Nova conversa
+              </button>
+            </div>
+
+            <!-- HISTORY LIST -->
+
+            <div
+              id="history-list"
+              class="px-2 pb-3 flex-1 overflow-y-auto space-y-1"
+            >
+              <div class="empty-history rounded-xl p-4 text-center mt-1">
+                <i
+                  data-lucide="messages-square"
+                  class="w-6 h-6 text-slate-600 mx-auto mb-2"
+                ></i>
+
+                <p class="text-[11px] text-slate-500">
+                  Nenhuma conversa ainda.
+                </p>
+
+                <p class="text-[10px] text-slate-600 mt-1">
+                  A primeira aparecerá aqui.
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- =================================================
+             CHAT
+             ================================================= -->
+
+        <section
+          class="glass-card rounded-2xl min-h-0 overflow-hidden flex flex-col"
+        >
+          <!-- CHAT HEADER -->
+
+          <div
+            class="px-4 sm:px-5 py-3 border-b border-slate-800/80 flex items-center justify-between gap-3"
+          >
+            <div class="min-w-0">
+              <p
+                class="text-[9px] uppercase tracking-[.16em] text-indigo-400 font-bold"
+              >
+                Planejamento docente
+              </p>
+
+              <h2
+                id="conversation-title"
+                class="text-sm sm:text-base font-bold text-slate-100 truncate"
+              >
+                Nova conversa
+              </h2>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span
+                id="save-status"
+                class="hidden sm:inline text-[10px] text-slate-600"
+              >
+                Pronto
+              </span>
+
+              <button
+                id="btn-copy"
+                type="button"
+                class="h-8 px-2.5 rounded-lg border border-slate-700 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-600 transition text-[10px] flex items-center gap-1.5"
+              >
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+
+                Copiar
+              </button>
+            </div>
+          </div>
+
+          <!-- =================================================
+               CHAT AREA
+               ================================================= -->
+
+          <div
+            id="chat-area"
+            class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-[380px]"
+          >
+            <!-- =================================================
+                 WELCOME
+                 ================================================= -->
+
+            <div
+              id="welcome-state"
+              class="welcome-state flex items-center justify-center py-1"
+            >
+              <div class="welcome-content w-full max-w-3xl text-center">
+                <!-- ICON -->
+
+                <div
+                  class="welcome-icon mx-auto w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-400/15 flex items-center justify-center mb-4"
+                >
+                  <i data-lucide="sparkles" class="w-6 h-6 text-indigo-300"></i>
+                </div>
+
+                <!-- EYEBROW -->
+
+                <p
+                  class="text-[9px] uppercase tracking-[.2em] font-bold text-indigo-400 mb-2"
+                >
+                  Assistente de Planejamento Docente
+                </p>
+
+                <!-- TITLE -->
+
+                <h3
+                  class="welcome-title text-2xl sm:text-[30px] font-black tracking-tight text-white"
+                >
+                  Vamos planejar sua aula?
+                </h3>
+
+                <!-- DESCRIPTION -->
+
+                <p
+                  class="welcome-description text-xs sm:text-sm text-slate-500 mt-2.5 max-w-xl mx-auto leading-relaxed"
+                >
+                  Conte o que você precisa preparar e transforme sua ideia em um
+                  planejamento de aula claro, organizado e adaptável à realidade
+                  da sua turma.
+                </p>
+
+                <!-- CONTEXT -->
+
+                <div
+                  class="context-pills flex flex-wrap items-center justify-center gap-1.5 mt-4"
+                >
+                  <span class="context-pill">
+                    <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+                    Qualquer etapa de ensino
+                  </span>
+
+                  <span class="context-divider"></span>
+
+                  <span class="context-pill">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                    Diferentes disciplinas
+                  </span>
+
+                  <span class="context-divider"></span>
+
+                  <span class="context-pill">
+                    <i data-lucide="clock-3" class="w-3.5 h-3.5"></i>
+                    Duração da aula
+                  </span>
+                </div>
+
+                <!-- SUGGESTIONS -->
+
+                <div class="suggestions-wrapper mt-6 text-left">
+                  <div class="suggestions-heading mb-2.5">
+                    <p class="text-[11px] font-semibold text-slate-300">
+                      Comece por um exemplo
+                    </p>
+
+                    <p class="text-[9px] text-slate-600 mt-0.5">
+                      Você pode editar o pedido antes de enviar.
+                    </p>
+                  </div>
+
+                  <div class="suggestion-grid">
+                    <!-- SUGGESTION 1 -->
+
+                    <button
+                      type="button"
+                      class="suggestion suggestion-card"
+                      data-suggestion="Me gere um plano de aula de Matemática sobre equações do 2º grau para o 1º ano do Ensino Médio, com duração de 50 minutos."
+                    >
+                      <span class="suggestion-icon">
+                        <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                      </span>
+
+                      <span class="suggestion-content">
+                        <strong> Criar um plano de aula </strong>
+
+                        <small>
+                          Comece do zero com tema, turma e duração.
+                        </small>
+                      </span>
+
+                      <i
+                        data-lucide="arrow-up-right"
+                        class="suggestion-arrow w-3.5 h-3.5"
+                      ></i>
+                    </button>
+
+                    <!-- SUGGESTION 2 -->
+
+                    <button
+                      type="button"
+                      class="suggestion suggestion-card"
+                      data-suggestion="Planeje uma aula prática de Ciências sobre fotossíntese para uma turma do Ensino Fundamental II, com duração de 50 minutos e uma atividade alinhada aos objetivos da aula."
+                    >
+                      <span class="suggestion-icon">
+                        <i data-lucide="lightbulb" class="w-4 h-4"></i>
+                      </span>
+
+                      <span class="suggestion-content">
+                        <strong> Planejar uma aula prática </strong>
+
+                        <small>
+                          Inclua uma atividade alinhada ao objetivo.
+                        </small>
+                      </span>
+
+                      <i
+                        data-lucide="arrow-up-right"
+                        class="suggestion-arrow w-3.5 h-3.5"
+                      ></i>
+                    </button>
+
+                    <!-- SUGGESTION 3 -->
+
+                    <button
+                      type="button"
+                      class="suggestion suggestion-card"
+                      data-suggestion="Planeje uma aula de História sobre a Revolução Industrial para uma turma do Ensino Fundamental II, com duração de 50 minutos e foco na revisão dos principais conceitos."
+                    >
+                      <span class="suggestion-icon">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                      </span>
+
+                      <span class="suggestion-content">
+                        <strong> Planejar uma aula de revisão </strong>
+
+                        <small> Retome um conteúdo de forma organizada. </small>
+                      </span>
+
+                      <i
+                        data-lucide="arrow-up-right"
+                        class="suggestion-arrow w-3.5 h-3.5"
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- =================================================
+               INPUT
+               ================================================= -->
+
+          <div
+            class="composer-area border-t border-slate-800/80 p-3 sm:p-2.5 bg-[#080c14]/45"
+          >
+            <div class="composer-shell">
+              <div class="composer-context">
+                <span class="composer-context-main">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+
+                  Planejamento docente
+                </span>
+
+                <span class="composer-context-separator"> / </span>
+
+                <span class="composer-context-muted">
+                  Descreva a aula que deseja planejar
+                </span>
+              </div>
+
+              <div class="flex items-end gap-2">
+                <div class="flex-1 relative">
+                  <textarea
+                    id="message-input"
+                    rows="3"
+                    maxlength="2000"
+                    placeholder="Ex.: Planeje uma aula de Ciências sobre fotossíntese para o 7º ano..."
+                    class="glass-input composer-input rounded-2xl px-4 py-3 pr-12 text-xs sm:text-sm leading-relaxed placeholder:text-slate-600"
+                  ></textarea>
+
+                  <div
+                    class="absolute bottom-2.5 right-3 text-[9px] text-slate-600"
+                  >
+                    <span id="char-count">0</span>/2000
+                  </div>
+                </div>
+
+                <button
+                  id="btn-send"
+                  type="button"
+                  disabled
+                  class="btn-neon shrink-0 h-[48px] w-[48px] rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Enviar mensagem"
+                >
+                  <i data-lucide="arrow-up" class="w-5 h-5"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center justify-between mt-2 px-1">
+                <p class="text-[9px] text-slate-600 flex items-center gap-1.5">
+                  <i data-lucide="info" class="w-3 h-3"></i>
+
+                  O planejamento é gerado a partir do contexto informado na
+                  conversa.
+                </p>
+
+                <p class="text-[9px] text-slate-600 hidden sm:block">
+                  Enter envia • Shift + Enter quebra linha
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- =====================================================
+         RENAME MODAL
+         ===================================================== -->
+
+    <div id="rename-modal" class="rename-modal hidden">
+      <div class="rename-card">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p
+              class="text-[9px] uppercase tracking-[.18em] text-indigo-400 font-bold"
+            >
+              Conversa
+            </p>
+
+            <h3 class="text-base font-bold text-white mt-1">
+              Renomear conversa
+            </h3>
+          </div>
+
+          <button
+            id="rename-close"
+            type="button"
+            class="w-8 h-8 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition flex items-center justify-center"
+            aria-label="Fechar"
+          >
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <input
+          id="rename-input"
+          type="text"
+          maxlength="80"
+          placeholder="Nome da conversa"
+          class="glass-input rounded-xl px-3 py-3 text-xs mt-5"
+        />
+
+        <div class="flex justify-end gap-2 mt-4">
+          <button
+            id="rename-cancel"
+            type="button"
+            class="px-3 py-2 rounded-lg border border-slate-700 text-[10px] text-slate-400 hover:text-white transition"
+          >
+            Cancelar
+          </button>
+
+          <button
+            id="rename-confirm"
+            type="button"
+            class="px-3 py-2 rounded-lg bg-indigo-500 text-[10px] font-semibold text-white hover:bg-indigo-400 transition"
+          >
+            Salvar nome
+          </button>
+        </div>
+      </div>
+    </div>
+
+    
+    <!-- MARKDOWN -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- KATEX -->
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+
+  <!-- APP JS -->
+  <script src="./js/app.js"></script>
+  </body>
+</html>

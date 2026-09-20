@@ -45,19 +45,36 @@ namespace ProfAssistenc.Api.Services
             };
 
             string jsonString = JsonSerializer.Serialize(payload, _options);
-            var content = new StringContent(jsonString, Encoding.UTF8, "application/json");
             try
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, _url);
-                request.Headers.Add("x-goog-api-key", _apiKey);
-                request.Content = content;
-                HttpResponseMessage httpResponse = await _httpClient.SendAsync(request);
-                string responseBody = await httpResponse.Content.ReadAsStringAsync();
-                if (!httpResponse.IsSuccessStatusCode) return null;
-                return ExtractResponseText(responseBody);
+                for (int tentativa = 1; tentativa <= 3; tentativa++)
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, _url);
+                    request.Headers.Add("x-goog-api-key", _apiKey);
+                    request.Content = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
+                    HttpResponseMessage httpResponse = await _httpClient.SendAsync(request);
+                    string responseBody = await httpResponse.Content.ReadAsStringAsync();
+
+                    if (httpResponse.IsSuccessStatusCode)
+                        return ExtractResponseText(responseBody);
+
+                    if ((int)httpResponse.StatusCode == 503)
+                    {
+                        await Task.Delay(1000 * tentativa);
+                        continue;
+                    }
+
+                    Console.WriteLine($"Erro Gemini: {(int)httpResponse.StatusCode}");
+                    Console.WriteLine(responseBody);
+
+                    return null;
+
+                }
+
+                return null;
             }
-            catch(HttpRequestException e)
+            catch (HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
                 return null;
@@ -82,24 +99,44 @@ namespace ProfAssistenc.Api.Services
             };
 
             string jsonString = JsonSerializer.Serialize(payload, _options);
-            var contentJSON = new StringContent(jsonString, Encoding.UTF8, "application/json");
-            try 
+            try
             {
-                var request = new HttpRequestMessage(HttpMethod.Post, _url);
-                request.Headers.Add("x-goog-api-key", _apiKey);
-                request.Content = contentJSON;
-                HttpResponseMessage httpResponse = await _httpClient.SendAsync(request);
-                string responseBody = await httpResponse.Content.ReadAsStringAsync();
-                if (!httpResponse.IsSuccessStatusCode) return null;
-                return ExtractResponseText(responseBody);
+                for (int tentativa = 1; tentativa <= 3; tentativa++)
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, _url);
+                    request.Headers.Add("x-goog-api-key", _apiKey);
+                    request.Content = new StringContent(jsonString, Encoding.UTF8, "application/json");
 
+                    HttpResponseMessage httpResponse = await _httpClient.SendAsync(request);
+                    string responseBody = await httpResponse.Content.ReadAsStringAsync();
+
+                    if (httpResponse.IsSuccessStatusCode)
+                    {
+                        string? title = ExtractResponseText(responseBody);
+                        Console.WriteLine($"Título gerado pela IA: {title}");
+                        return title;
+                    }
+
+                    if ((int)httpResponse.StatusCode == 503)
+                    {
+                        await Task.Delay(1000 * tentativa);
+                        continue;
+                    }
+                    Console.WriteLine($"Erro Gemini ao gerar título: {(int)httpResponse.StatusCode}");
+                    Console.WriteLine(responseBody);
+
+                    return null;
+
+                }
+                Console.WriteLine("Não foi possível gerar o título após 3 tentativas.");
+                return null;
             }
-            catch(HttpRequestException e)
+            catch (HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
                 return null;
             }
-            
+
         }
         private string? ExtractResponseText(string responseBody)
         {
