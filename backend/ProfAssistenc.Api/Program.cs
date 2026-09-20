@@ -1,6 +1,7 @@
 using ProfAssistenc.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using ProfAssistenc.Api.Data;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,5 +64,16 @@ app.UseCors("Frontend");
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = "http://localhost:5000",
+        UseShellExecute = true
+    });
+});
+
+app.Run();
 
 app.Run();
