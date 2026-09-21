@@ -1,4 +1,8 @@
+
 # ProfAssistenc IA
+ <p align="center">
+  <img src=./assets/graduation-hat-logo.png>
+</p>
 
 <p align="center">
 	<strong>Assistente inteligente para planejamento docente</strong>
@@ -145,11 +149,10 @@ Os parâmetros necessários e os exemplos de requisição podem ser consultados 
 
 ## Colaboradores
 
-| Integrante        | Responsabilidade                                                                    | GitHub                                  |
-| ----------------- | ----------------------------------------------------------------------------------- | --------------------------------------- |
-| **Raycka Castro** | Desenvolvimento do frontend com HTML, CSS e JavaScript                              | [Rayck4dev](https://github.com/Rayck4dev) |
+| Integrante        | Responsabilidade                                                                    | GitHub                                              |
+| ----------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Raycka Castro** | Desenvolvimento do frontend com HTML, CSS e JavaScript                              | [Rayck4dev](https://github.com/Rayck4dev)           |
 | **Victor Macedo** | Desenvolvimento do backend com C#, ASP.NET Core, banco de dados e integração com IA | [VictorMacedoCB](https://github.com/VictorMacedoCB) |
-
 
 ## Licença
 
