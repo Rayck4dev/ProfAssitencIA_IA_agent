@@ -1,0 +1,2 @@
+# Só é necessário para (re)gerar a base de conhecimento a partir dos PDFs.
+pymupdf>=1.24

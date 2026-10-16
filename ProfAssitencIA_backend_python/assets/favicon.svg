@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ProfAssistenc">
+  <rect width="32" height="32" rx="5" fill="#1b6a4a"/>
+  <text x="16" y="22.5" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" text-anchor="middle" fill="#ffffff">P</text>
+  <rect x="7" y="26" width="18" height="2.4" fill="#f1cf5f"/>
+</svg>
