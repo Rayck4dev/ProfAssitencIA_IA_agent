@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="ProfAssistenc">
+  <rect width="48" height="48" rx="11" fill="#1b6a4a"/>
+  <path d="M14.5 8H28l8 8v21.5a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 12 37.5v-27A2.5 2.5 0 0 1 14.5 8z" fill="#fffdf7"/>
+  <path d="M28 8v5.5a2.5 2.5 0 0 0 2.5 2.5H36z" fill="#c9dfd3"/>
+  <rect x="15" y="26.2" width="18" height="4.8" rx="1" fill="#f1cf5f"/>
+  <path d="M16.5 22h15M16.5 28.6h15M16.5 35h9" fill="none" stroke="#1b6a4a" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

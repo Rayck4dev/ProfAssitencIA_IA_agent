@@ -1,0 +1,33 @@
+PROFASSISTENC - planejamento de aulas com IA
+=============================================
+
+COMO ABRIR
+  1. Dê dois cliques em "ProfAssistenc" (o ícone verde com uma folha).
+  2. Uma janela preta aparece e o navegador abre sozinho. A janela preta é o
+     programa funcionando: deixe-a aberta (pode minimizar).
+  3. Para sair, feche a janela preta.
+
+PRIMEIRA VEZ
+  O programa pede a sua chave gratuita da Groq (leva uns 2 minutos):
+    - Abra console.groq.com/keys e entre com a sua conta Google ou e-mail.
+    - Clique em "Create API Key", dê um nome e copie a chave (começa com gsk_).
+    - Cole na janela do programa e clique em "Salvar e testar".
+  Isso é feito uma única vez.
+
+SE O WINDOWS AVISAR "O Windows protegeu seu computador"
+  O programa é novo e ainda não tem assinatura digital. Clique em "Mais
+  informações" e depois em "Executar assim mesmo".
+
+SUAS CONVERSAS
+  Ficam salvas neste computador, no arquivo "profassistenc.db", dentro desta
+  pasta. A chave fica no arquivo ".env" (não compartilhe este arquivo).
+  Para atualizar para uma versão nova, copie a pasta nova por cima desta,
+  mantendo esses dois arquivos.
+
+PRIVACIDADE
+  O que você escreve (e fala) é enviado à Groq para gerar as respostas.
+  Não coloque nomes ou dados pessoais de estudantes nos pedidos.
+
+PROBLEMAS?
+  Veja o Manual (PDF) ou o arquivo "profassistenc.log" desta pasta, e envie-o
+  a quem deu o programa a você.
