@@ -68,7 +68,8 @@
     renameDialog: $("#renameDialog"), renameInput: $("#renameInput"),
     deleteDialog: $("#deleteDialog"), deleteText: $("#deleteText"),
     toast: $("#toast"), openMenu: $("#openMenu"), closeMenu: $("#closeMenu"),
-    setupDialog: $("#setupDialog"), setupKey: $("#setupKey"), setupShow: $("#setupShow"),
+    setupDialog: $("#setupDialog"), setupForm: $("#setupForm"), setupCancel: $("#setupCancel"),
+    setupKey: $("#setupKey"), setupShow: $("#setupShow"),
     setupMsg: $("#setupMsg"), setupSave: $("#setupSave"), setupIntro: $("#setupIntro"), openSetup: $("#openSetup"),
     toggleSidebar: $("#toggleSidebar"), toggleWidth: $("#toggleWidth"), widthLabel: $("#widthLabel"),
   };
@@ -1176,7 +1177,13 @@
     }
   }
 
-  els.setupSave.addEventListener("click", saveKey);
+  els.setupForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveKey();
+  });
+  els.setupCancel.addEventListener("click", () => {
+    els.setupDialog.close("cancel");
+  });
   els.setupKey.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
