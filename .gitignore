@@ -1,17 +1,30 @@
-# .NET
-bin/
-obj/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
 
-# Visual Studio
-.vs/
-*.user
-*.suo
+# Empacotamento (PyInstaller)
+build/
+dist/
 
 # SQLite
 *.db
 *.db-shm
 *.db-wal
+*.db-journal
 
-# Secrets
+# Segredos
 .env
 .env.*
+!.env.example
+appsettings.Local.json
+
+# Editores / sistema
+.vs/
+.vscode/
+.idea/
+.DS_Store
+.venv-build/
+installer/output/
